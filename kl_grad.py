@@ -25,24 +25,24 @@ class torchPDF(torch.nn.Module):
 import scipy.stats
 TRUE_MEAN, TRUE_STD = 3, 2
 X = torch.Tensor(np.random.randn(500)) * TRUE_STD + TRUE_MEAN
-Q = torch.Tensor(scipy.stats.norm(TRUE_MEAN, TRUE_STD).pdf(X.detach())) # target distribution
+P = torch.Tensor(scipy.stats.norm(TRUE_MEAN, TRUE_STD).pdf(X.detach())) # target distribution
 
 ITERATIONS = 5000
-LEARNING_RATE = 0.05
+LEARNING_RATE = 0.005
 eps = 1e-10
 
 pdf = torchPDF()
 optimizer = torch.optim.SGD(pdf.parameters(), lr=LEARNING_RATE)
 
 for _ in range(ITERATIONS): 
-    P = pdf(X) # this should be a pytorch tensor. 
+    Q = pdf(X) # this should be a pytorch tensor. 
     
     
     optimizer.zero_grad()
 
     # compute the difference between P(x) and Q(x) distributions 
 
-    KL_divergence = torch.sum(Q * torch.log(Q / (P + eps)))
+    KL_divergence = torch.sum(P * torch.log(P / (Q + eps)))
     KL_divergence.backward()
 
     print(f"current KL_divergence: {KL_divergence.item()}")
